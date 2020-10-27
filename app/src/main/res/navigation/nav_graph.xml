@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/welcomeFragment">
+
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.dlutrix.foodfinder.ui.welcome.WelcomeFragment"
+        android:label="WelcomeFragment">
+        <action
+            android:id="@+id/action_welcomeFragment_to_homeTestAgainFragment"
+            app:destination="@id/homeFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/restaurantByCollectionFragment"
+        android:name="com.dlutrix.foodfinder.ui.restaurantByCollection.RestaurantByCollectionFragment"
+        android:label="RestaurantByCollectionFragment">
+        <argument
+            android:name="collectionId"
+            app:argType="integer" />
+        <argument
+            android:name="collectionTitle"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_restaurantByCollectionFragment_to_detailRestaurantFragment"
+            app:destination="@id/detailRestaurantFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailRestaurantFragment"
+        android:name="com.dlutrix.foodfinder.ui.detailRestaurant.DetailRestaurantFragment"
+        android:label="DetailRestaurantFragment">
+        <argument
+            android:name="restaurantX"
+            app:argType="com.dlutrix.foodfinder.data.model.RestaurantX" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.dlutrix.foodfinder.ui.home.HomeFragment"
+        android:label="HomeFragment">
+        <action
+            android:id="@+id/action_homeFragment_to_restaurantByCollectionFragment"
+            app:destination="@id/restaurantByCollectionFragment"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right" />
+        <action
+            android:id="@+id/action_homeFragment_to_detailRestaurantFragment"
+            app:destination="@id/detailRestaurantFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+    </fragment>
+</navigation>

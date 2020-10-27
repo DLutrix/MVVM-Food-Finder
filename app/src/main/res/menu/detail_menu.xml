@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/restaurant_menu"
+        android:checkable="false"
+        android:checked="false"
+        android:icon="@drawable/ic_round_menu_book"
+        android:title="Menu"
+        app:showAsAction="ifRoom" />
+
+
+    <item
+        android:id="@+id/location"
+        android:checkable="false"
+        android:icon="@drawable/ic_round_location_on"
+        android:title="Location"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/telephone"
+        android:checkable="false"
+        android:icon="@drawable/ic_round_phone"
+        android:title="Phone"
+        app:showAsAction="ifRoom" />
+
+
+    <!--  Invisible item  -->
+
+    <item
+        android:visible="false"
+        android:id="@+id/any"
+        android:checkable="false"
+        android:icon="@drawable/ic_round_phone"
+        android:title="Phone"
+        app:showAsAction="ifRoom" />
+
+</menu>

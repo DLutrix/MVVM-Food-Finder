@@ -1,0 +1,28 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="buttonStyle">@style/Button.White</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:fontFamily">@font/lato</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorControlHighlight">#42FE724C</item>
+    </style>
+
+    <style name="Button.White" parent="ThemeOverlay.MaterialComponents">
+        <item name="colorPrimary">@color/colorAccent</item>
+    </style>
+
+    <style name="ActionBarTextAppearance" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">@font/lato</item>
+    </style>
+
+    <style name="ThemeOverlay.AppCompat.Dark.ActionBar" parent="Base.ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+
+
+</resources>

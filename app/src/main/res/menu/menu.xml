@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/change_location"
+        android:title="Change Location"
+        android:icon="@drawable/ic_round_refresh_24"
+        app:showAsAction="always"/>
+
+</menu>
