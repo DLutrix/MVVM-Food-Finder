@@ -6,8 +6,8 @@ import com.dlutrix.foodfinder.data.model.Review
 import com.dlutrix.foodfinder.repository.review.ReviewRepository
 import com.dlutrix.foodfinder.utils.NetworkHelper
 import com.dlutrix.foodfinder.utils.Resource
-import com.squareup.inject.assisted.Assisted
-import com.squareup.inject.assisted.AssistedInject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 
 
@@ -21,7 +21,7 @@ class DetailRestaurantViewModel @AssistedInject constructor(
     @Assisted private val resId: Int
 ) : ViewModel() {
 
-    @AssistedInject.Factory
+    @dagger.assisted.AssistedFactory
     interface AssistedFactory {
         fun create(resId: Int): DetailRestaurantViewModel
     }

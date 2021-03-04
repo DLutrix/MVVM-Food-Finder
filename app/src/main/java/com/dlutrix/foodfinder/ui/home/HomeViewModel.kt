@@ -1,7 +1,6 @@
 package com.dlutrix.foodfinder.ui.home
 
 import android.content.SharedPreferences
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.cachedIn
 import com.dlutrix.foodfinder.data.model.RestaurantCollection
@@ -13,14 +12,17 @@ import com.dlutrix.foodfinder.utils.Constant.DEFAULT_LONG
 import com.dlutrix.foodfinder.utils.LocationHelper
 import com.dlutrix.foodfinder.utils.NetworkHelper
 import com.dlutrix.foodfinder.utils.Resource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
 
 
 /**
  * w0rm1995 on 22/10/20.
  * risfandi@dlutrix.com
  */
-class HomeViewModel @ViewModelInject constructor(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val restaurantCollectionRepository: RestaurantCollectionRepository,
     private val restaurantAroundRepository: RestaurantAroundRepository,
     var sharedPreferences: SharedPreferences,
