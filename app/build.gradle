@@ -71,11 +71,6 @@ dependencies {
     androidTestImplementation "com.google.dagger:hilt-android-testing:2.32-alpha"
     kaptAndroidTest "com.google.dagger:hilt-compiler:2.32-alpha"
 
-
-//    // Assisted Inject
-//    compileOnly 'com.squareup.inject:assisted-inject-annotations-dagger2:0.6.0'
-//    kapt 'com.squareup.inject:assisted-inject-processor-dagger2:0.6.0'
-
     // Retrofit + GSON
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
