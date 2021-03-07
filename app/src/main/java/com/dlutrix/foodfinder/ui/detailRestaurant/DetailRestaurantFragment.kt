@@ -170,7 +170,7 @@ class DetailRestaurantFragment : Fragment() {
 
 
     private fun observer() {
-        observe(viewModel.reviews) {
+        observe(viewModel.reviewsLiveData) {
             reviewAdapter.submitData(it)
         }
     }

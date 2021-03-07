@@ -2,6 +2,7 @@ package com.dlutrix.foodfinder.ui.home
 
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,12 +24,14 @@ import com.dlutrix.foodfinder.utils.Constant.DEFAULT_LAT
 import com.dlutrix.foodfinder.utils.Constant.DEFAULT_LONG
 import com.google.android.material.appbar.AppBarLayout
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
 /**
  * w0rm1995 on 22/10/20.
  * risfandi@dlutrix.com
  */
+@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
     RestaurantAroundAdapter.OnItemClickListener {
@@ -116,7 +119,7 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
 
     private fun setupOnCreateView() {
 
-        sliderHandler = Handler()
+        sliderHandler = Handler(Looper.getMainLooper())
 
         with(binding) {
             carouselAdapter =
@@ -147,11 +150,11 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
     private fun changeLocation() {
         observe(viewModel.locationLiveData) {
             viewModel.sharedPreferences.edit()
-                .putString(Constant.KEY_LAT, it.latitude.toString())
-                .putString(Constant.KEY_LONG, it.longitude.toString())
+                .putString(Constant.KEY_LAT, it.first)
+                .putString(Constant.KEY_LONG, it.second)
                 .apply()
 
-            viewModel.getRemoteData(it.latitude, it.longitude)
+            viewModel.getRemoteData(it.first.toDouble(), it.second.toDouble())
         }
     }
 

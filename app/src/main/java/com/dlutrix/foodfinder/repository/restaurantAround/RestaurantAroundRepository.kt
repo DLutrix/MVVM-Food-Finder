@@ -26,5 +26,5 @@ class RestaurantAroundRepository @Inject constructor(
             enablePlaceholders = false
         ),
         pagingSourceFactory = { RestaurantAroundRemotePagingDataSource(api, lat, long) }
-    ).liveData
+    ).flow
 }

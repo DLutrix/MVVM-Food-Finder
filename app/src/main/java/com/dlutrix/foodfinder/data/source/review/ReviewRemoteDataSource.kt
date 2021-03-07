@@ -1,8 +1,7 @@
 package com.dlutrix.foodfinder.data.source.review
 
-import com.dlutrix.foodfinder.data.model.Review
 import com.dlutrix.foodfinder.data.source.ZomatoApiService
-import retrofit2.Response
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 
@@ -14,6 +13,7 @@ class ReviewRemoteDataSource @Inject constructor(
     private val api: ZomatoApiService
 ) {
 
-    suspend fun getReview(resId: Int): Response<Review> =
-        api.getReviews(resId)
+    fun getReviews(resId: Int) = flow {
+        emit(api.getReviews(resId))
+    }
 }

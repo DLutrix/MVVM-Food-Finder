@@ -25,5 +25,5 @@ class RestaurantByCollectionRepository @Inject constructor(
             enablePlaceholders = false
         ),
         pagingSourceFactory = { RestaurantByCollectionRemotePagingDataSource(api, collectionId) }
-    ).liveData
+    ).flow
 }

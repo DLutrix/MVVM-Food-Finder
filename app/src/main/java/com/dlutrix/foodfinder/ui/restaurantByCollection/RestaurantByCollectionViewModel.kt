@@ -2,11 +2,13 @@ package com.dlutrix.foodfinder.ui.restaurantByCollection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.dlutrix.foodfinder.repository.restaurantByCollection.RestaurantByCollectionRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Dispatchers
 
 /**
  * w0rm1995 on 16/10/20.
@@ -24,6 +26,7 @@ class RestaurantByCollectionViewModel @AssistedInject constructor(
 
     val restaurantByCollection =
         restaurantByCollectionRepository.getRestaurantByCollection(collectionId)
+            .asLiveData(viewModelScope.coroutineContext + Dispatchers.IO)
             .cachedIn(viewModelScope)
 
 
