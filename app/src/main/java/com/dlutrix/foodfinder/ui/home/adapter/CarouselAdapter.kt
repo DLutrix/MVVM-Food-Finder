@@ -2,8 +2,8 @@ package com.dlutrix.foodfinder.ui.home.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -17,7 +17,7 @@ import com.dlutrix.foodfinder.databinding.ImageSliderItemBinding
  * risfandi@dlutrix.com
  */
 class CarouselAdapter(private val listener: OnItemClickListener) :
-    RecyclerView.Adapter<CarouselAdapter.CarouselViewHolder>() {
+    ListAdapter<Collection, CarouselAdapter.CarouselViewHolder>(DiffCallback()) {
 
     inner class CarouselViewHolder(
         private val binding: ImageSliderItemBinding
@@ -26,7 +26,7 @@ class CarouselAdapter(private val listener: OnItemClickListener) :
         init {
             binding.root.setOnClickListener {
                 val position = bindingAdapterPosition
-                val item = differ.currentList[position]
+                val item = getItem(position)
                 listener.onCarouselItemClick(
                     item.collection.collectionId!!,
                     item.collection.title!!
@@ -47,20 +47,6 @@ class CarouselAdapter(private val listener: OnItemClickListener) :
         }
     }
 
-    private val differCallback = object : DiffUtil.ItemCallback<Collection>() {
-        override fun areItemsTheSame(oldItem: Collection, newItem: Collection): Boolean {
-            return oldItem.collection.collectionId == newItem.collection.collectionId
-        }
-
-        override fun areContentsTheSame(oldItem: Collection, newItem: Collection): Boolean {
-            return oldItem == newItem
-        }
-    }
-
-    private val differ = AsyncListDiffer(this, differCallback)
-
-    fun submitList(list: List<Collection>) = differ.submitList(list)
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarouselViewHolder {
         val binding =
             ImageSliderItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -69,17 +55,23 @@ class CarouselAdapter(private val listener: OnItemClickListener) :
     }
 
     override fun onBindViewHolder(holder: CarouselViewHolder, position: Int) {
-        val item = differ.currentList[position]
+        val item = getItem(position)
 
         holder.bind(item.collection)
     }
 
-    override fun getItemCount(): Int {
-        return differ.currentList.size
-    }
-
     interface OnItemClickListener {
         fun onCarouselItemClick(collectionId: Int, collectionTitle: String)
+    }
+
+    class DiffCallback : DiffUtil.ItemCallback<Collection>() {
+        override fun areItemsTheSame(oldItem: Collection, newItem: Collection): Boolean {
+            return oldItem.collection.collectionId == newItem.collection.collectionId
+        }
+
+        override fun areContentsTheSame(oldItem: Collection, newItem: Collection): Boolean {
+            return oldItem == newItem
+        }
     }
 
 }
