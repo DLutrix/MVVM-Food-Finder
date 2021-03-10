@@ -14,7 +14,6 @@ Food Finder adalah aplikasi sederhana untuk menemukan restoran di sekitar penggu
 ## Libraries and tools
 
 <li><a href="https://github.com/square/AssistedInject">Assisted Inject</a></li>
-<li><a href="https://github.com/Codigami/CFAlertDialog">CF Alert Dialog</a></li>
 <li><a href="https://github.com/googlesamples/easypermissions">Easy Permissions</a></li>
 <li><a href="https://github.com/bumptech/glide">Glide</a></li>
 <li><a href="https://dagger.dev/hilt/">Hilt</a></li>
