@@ -103,7 +103,7 @@ class HomeViewModel @Inject constructor(
         getRemoteData(lat, long)
     }
 
-    fun onRestaurantClick(restaurantX: RestaurantX) = viewModelScope.launch {
+    fun onRestaurantItemClick(restaurantX: RestaurantX) = viewModelScope.launch {
         homeEventChannel.send(HomeEvent.NavigateToDetailRestaurant(restaurantX))
     }
 

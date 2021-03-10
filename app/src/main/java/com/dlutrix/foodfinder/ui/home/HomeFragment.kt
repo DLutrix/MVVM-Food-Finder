@@ -328,7 +328,7 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
     }
 
     override fun onRestaurantItemClick(restaurantX: RestaurantX) {
-        viewModel.onRestaurantClick(restaurantX)
+        viewModel.onRestaurantItemClick(restaurantX)
     }
 
     override fun onResume() {

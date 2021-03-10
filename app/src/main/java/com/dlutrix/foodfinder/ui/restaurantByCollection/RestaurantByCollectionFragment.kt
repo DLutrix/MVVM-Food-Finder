@@ -5,10 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
@@ -20,6 +20,7 @@ import com.dlutrix.foodfinder.ui.restaurantByCollection.adapter.RestaurantByColl
 import com.dlutrix.foodfinder.utils.Widget
 import com.dlutrix.foodfinder.utils.observe
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
 /**
@@ -97,7 +98,7 @@ class RestaurantByCollectionFragment : Fragment(),
                     Widget.customSnackbar(
                         requireContext(),
                         requireView(),
-                       "Result could not be loaded",
+                        "Result could not be loaded",
                         adapter::retry
                     )
                 }
@@ -107,12 +108,23 @@ class RestaurantByCollectionFragment : Fragment(),
     }
 
     override fun onRestaurantItemClick(restaurantX: RestaurantX) {
-        val action = RestaurantByCollectionFragmentDirections
-            .actionRestaurantByCollectionFragmentToDetailRestaurantFragment(restaurantX)
-        findNavController().navigate(action)
+        viewModel.onRestaurantItemClick(restaurantX)
     }
 
     private fun observer() {
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.restaurantByCollectionEvent.collect {
+                when (it) {
+                    is RestaurantByCollectionViewModel.RestaurantByCollectionEvent.NavigateToDetailRestaurant -> {
+                        val action = RestaurantByCollectionFragmentDirections
+                            .actionRestaurantByCollectionFragmentToDetailRestaurantFragment(it.restaurantX)
+                        findNavController().navigate(action)
+                    }
+                }
+            }
+        }
+
         observe(viewModel.restaurantByCollection) {
             adapter.submitData(viewLifecycleOwner.lifecycle, it)
         }
