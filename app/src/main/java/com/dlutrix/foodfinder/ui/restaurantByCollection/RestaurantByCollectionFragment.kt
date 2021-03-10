@@ -94,13 +94,12 @@ class RestaurantByCollectionFragment : Fragment(),
                 shimmerRestaurantItem.isVisible = loadState.source.refresh is LoadState.Loading
                 rvRestaurantItem.isVisible = loadState.source.refresh is LoadState.NotLoading
                 if (loadState.source.refresh is LoadState.Error) {
-                    Widget.customDialog(
+                    Widget.customSnackbar(
                         requireContext(),
-                        adapter::retry,
-                        "Try Again",
-                        "Result could not be loaded",
-                        true
-                    ).show()
+                        requireView(),
+                       "Result could not be loaded",
+                        adapter::retry
+                    )
                 }
             }
 

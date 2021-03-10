@@ -107,9 +107,6 @@ dependencies {
     // Paging 3
     implementation "androidx.paging:paging-runtime-ktx:3.0.0-alpha07"
 
-    //CF Alert
-    implementation 'com.crowdfire.cfalertdialog:cfalertdialog:1.1.0'
-
     // Shimmer
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 

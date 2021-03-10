@@ -2,9 +2,10 @@ package com.dlutrix.foodfinder.utils
 
 import android.content.Context
 import android.graphics.Color
+import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.crowdfire.cfalertdialog.CFAlertDialog
 import com.dlutrix.foodfinder.R
+import com.google.android.material.snackbar.Snackbar
 
 /**
  * w0rm1995 on 16/10/20.
@@ -12,45 +13,26 @@ import com.dlutrix.foodfinder.R
  */
 object Widget {
 
-    fun customDialog(
+    fun customSnackbar(
         context: Context,
-        yes: () -> Unit,
-        buttonText: String,
+        view: android.view.View,
         message: String,
-        isCancelable: Boolean,
-    ): CFAlertDialog.Builder {
-        return if (!isCancelable) {
-            CFAlertDialog.Builder(context)
-                .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
-                .setTitle("Oops!")
-                .setCancelable(false)
-                .setMessage(message)
-                .addButton(
-                    buttonText,
-                    Color.BLACK,
-                    ContextCompat.getColor(context, R.color.colorAccent),
-                    CFAlertDialog.CFAlertActionStyle.POSITIVE,
-                    CFAlertDialog.CFAlertActionAlignment.JUSTIFIED
-                ) { dialog, _ ->
-                    yes()
-                    dialog.dismiss()
-                }
-        } else {
-            CFAlertDialog.Builder(context)
-                .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
-                .setTitle("Oops!")
-                .setCancelable(true)
-                .setMessage(message)
-                .addButton(
-                    buttonText,
-                    Color.BLACK,
-                    ContextCompat.getColor(context, R.color.colorAccent),
-                    CFAlertDialog.CFAlertActionStyle.POSITIVE,
-                    CFAlertDialog.CFAlertActionAlignment.JUSTIFIED
-                ) { dialog, _ ->
-                    yes()
-                    dialog.dismiss()
-                }
+        action: () -> Unit
+    ) {
+        val snackbar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE)
+        val snackbarActionTextView =
+            snackbar.view.findViewById(com.google.android.material.R.id.snackbar_action) as TextView
+        snackbarActionTextView.isAllCaps = false
+        snackbar.view.setBackgroundColor(
+            ContextCompat.getColor(
+                context,
+                R.color.secondaryColorAccent
+            )
+        )
+        snackbar.setActionTextColor(Color.WHITE)
+        snackbar.setAction("Retry") {
+            action()
         }
+        snackbar.show()
     }
 }
