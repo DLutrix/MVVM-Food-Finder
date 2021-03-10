@@ -111,5 +111,5 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
     // Recyclerview
-    implementation "androidx.recyclerview:recyclerview:1.2.0-alpha06"
+    implementation "androidx.recyclerview:recyclerview:1.2.0-beta02"
 }
