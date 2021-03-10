@@ -12,7 +12,6 @@ import javax.inject.Singleton
  * w0rm1995 on 16/10/20.
  * risfandi@dlutrix.com
  */
-@Singleton
 class RestaurantAroundRepository @Inject constructor(
     private val api: ZomatoApiService
 ) {
@@ -27,5 +26,5 @@ class RestaurantAroundRepository @Inject constructor(
             enablePlaceholders = false
         ),
         pagingSourceFactory = { RestaurantAroundRemotePagingDataSource(api, lat, long) }
-    ).liveData
+    ).flow
 }

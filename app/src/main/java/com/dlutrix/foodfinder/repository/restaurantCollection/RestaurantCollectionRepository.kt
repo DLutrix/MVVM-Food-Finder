@@ -1,21 +1,41 @@
 package com.dlutrix.foodfinder.repository.restaurantCollection
 
-import com.dlutrix.foodfinder.data.model.RestaurantCollection
 import com.dlutrix.foodfinder.data.source.restaurantCollection.RestaurantCollectionRemoteDataSource
-import retrofit2.Response
+import com.dlutrix.foodfinder.utils.Resource
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * w0rm1995 on 16/10/20.
  * risfandi@dlutrix.com
  */
-@Singleton
 class RestaurantCollectionRepository @Inject constructor(
     private val remoteDataSource: RestaurantCollectionRemoteDataSource
 ) {
-    suspend fun getRestaurantCollection(
+
+    fun getRestaurantCollectionFlow(
         lat: Double,
         long: Double
-    ): Response<RestaurantCollection> = remoteDataSource.getRestaurantCollection(lat, long)
+    ) = flow {
+        remoteDataSource.getRestaurantCollectionFlow(lat, long).onStart {
+            emit(Resource.loading(null))
+        }.catch {
+            emit(
+                Resource.error(
+                    null,
+                    "Failed to retrieve data from server please check your network and try again",
+                    true
+                )
+            )
+        }.collect {
+            if (it.isSuccessful) {
+                emit(Resource.success(it.body()!!))
+            } else {
+                emit(Resource.error(null, "Your location is not available", false))
+            }
+        }
+    }
 }

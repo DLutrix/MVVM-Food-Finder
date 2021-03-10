@@ -8,10 +8,10 @@
     android:animateLayoutChanges="true">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:background="@color/colorPrimaryDark"
         android:id="@+id/appbar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
         android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -48,8 +48,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_marginTop="72dp"
-                    android:clipChildren="false"
                     android:background="@color/colorPrimaryDark"
+                    android:clipChildren="false"
                     android:clipToPadding="false"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
@@ -177,6 +177,5 @@
         android:paddingTop="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

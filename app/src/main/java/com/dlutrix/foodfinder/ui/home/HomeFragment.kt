@@ -1,7 +1,9 @@
 package com.dlutrix.foodfinder.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.viewpager2.widget.ViewPager2
@@ -19,19 +22,22 @@ import com.dlutrix.foodfinder.ui.core.adapter.RestaurantLoadStateAdapter
 import com.dlutrix.foodfinder.ui.home.adapter.CarouselAdapter
 import com.dlutrix.foodfinder.ui.home.adapter.RestaurantAroundAdapter
 import com.dlutrix.foodfinder.utils.*
-import com.dlutrix.foodfinder.utils.Constant.DEFAULT_LAT
-import com.dlutrix.foodfinder.utils.Constant.DEFAULT_LONG
 import com.google.android.material.appbar.AppBarLayout
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import pub.devrel.easypermissions.AppSettingsDialog
+import pub.devrel.easypermissions.EasyPermissions
 
 
 /**
  * w0rm1995 on 22/10/20.
  * risfandi@dlutrix.com
  */
+@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
-    RestaurantAroundAdapter.OnItemClickListener {
+    RestaurantAroundAdapter.OnItemClickListener, EasyPermissions.PermissionCallbacks {
 
     private val viewModel: HomeViewModel by viewModels()
 
@@ -48,6 +54,44 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
     private var currentPosition = 0
 
     private var shouldMoveForward = true
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+        viewModel.refreshLocation()
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            AppSettingsDialog.Builder(this).build().show()
+        } else {
+            PermissionHelper.requestPermission(
+                this,
+                "You need to accept location permission to use this app",
+                1
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
+            PermissionHelper.requestPermission(
+                this,
+                "You need to accept location permission to use this app",
+                1
+            )
+        } else {
+            viewModel.refreshLocation()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,7 +160,7 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
 
     private fun setupOnCreateView() {
 
-        sliderHandler = Handler()
+        sliderHandler = Handler(Looper.getMainLooper())
 
         with(binding) {
             carouselAdapter =
@@ -136,35 +180,58 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
                 with(binding) {
                     shimmerRestaurantAround.isVisible =
                         loadState.source.refresh is LoadState.Loading
-                    rvRestaurantAround.isVisible = loadState.source.refresh is LoadState.NotLoading
-                    buttonRetry.isVisible = loadState.source.refresh is LoadState.Error
-                    textViewError.isVisible = loadState.source.refresh is LoadState.Error
+                    rvRestaurantAround.isVisible =
+                        loadState.source.refresh is LoadState.NotLoading && viewModel.isError.value == false
+                    buttonRetry.isVisible =
+                        loadState.source.refresh is LoadState.Error && viewModel.isError.value == false
+                    textViewError.isVisible =
+                        loadState.source.refresh is LoadState.Error && viewModel.isError.value == false
                 }
             }
         }
     }
 
     private fun changeLocation() {
-        observe(viewModel.locationLiveData) {
-            viewModel.sharedPreferences.edit()
-                .putString(Constant.KEY_LAT, it.latitude.toString())
-                .putString(Constant.KEY_LONG, it.longitude.toString())
-                .apply()
-
-            viewModel.getRemoteData(it.latitude, it.longitude)
+        if (PermissionHelper.hasLocationPermission(requireContext())) {
+            viewModel.refreshLocation()
+        } else {
+            PermissionHelper.requestPermission(
+                this,
+                "You need to accept location permission to use this app",
+                1
+            )
         }
     }
 
-    private fun retryObserver() {
-        viewModel.sharedPreferences.edit()
-            .putString(Constant.KEY_LAT, DEFAULT_LAT)
-            .putString(Constant.KEY_LONG, DEFAULT_LONG)
-            .apply()
-
-        viewModel.getRemoteData(DEFAULT_LAT.toDouble(), DEFAULT_LONG.toDouble())
-    }
-
     private fun observer() {
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.homeEvent.collect {
+                when (it) {
+                    is HomeViewModel.HomeEvent.RefreshLocation -> {
+                        viewModel.retryObserverWhenLocationChanged(
+                            it.location.first.toDouble(),
+                            it.location.second.toDouble()
+                        )
+                    }
+                    is HomeViewModel.HomeEvent.NavigateToDetailRestaurant -> {
+                        val action =
+                            HomeFragmentDirections.actionHomeFragmentToDetailRestaurantFragment(
+                                it.restaurantX
+                            )
+                        findNavController().navigate(action)
+                    }
+                    is HomeViewModel.HomeEvent.NavigateToRestaurantCollection -> {
+                        val action = HomeFragmentDirections
+                            .actionHomeFragmentToRestaurantByCollectionFragment(
+                                it.collectionId,
+                                it.collectionTitle
+                            )
+                        findNavController().navigate(action)
+                    }
+                }
+            }
+        }
 
         observe(viewModel.locationName) {
             binding.toolbarText.text = it
@@ -186,6 +253,7 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
                 }
                 Status.ERROR -> {
                     with(binding) {
+                        viewModel.setIsError(true)
                         vpShimmer.gone()
                         vpCarousel.gone()
                         dotsIndicator.gone()
@@ -194,26 +262,25 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
                         buttonRetry.gone()
                     }
                     if (it.isNetworkError!!) {
-                        Widget.customDialog(
+                        Widget.customSnackbar(
                             requireContext(),
-                            (::retryObserver),
-                            "Try Again!",
+                            requireView(),
                             it.message!!,
-                            false
-                        ).show()
+                            ((viewModel::retryObserver))
+                        )
                     } else {
-                        Widget.customDialog(
+                        Widget.customSnackbar(
                             requireContext(),
-                            (::retryObserver),
-                            "Use Default Location",
+                            requireView(),
                             it.message!!,
-                            false
-                        ).show()
+                            ((viewModel::retryObserverIfLocationNotAvailable))
+                        )
                     }
                 }
                 Status.SUCCESS -> {
                     carouselAdapter.submitList(it.data!!.collections)
                     with(binding) {
+                        viewModel.setIsError(false)
                         vpShimmer.gone()
                         vpCarousel.offscreenPageLimit = 1
                         dotsIndicator.setViewPager2(vpCarousel)
@@ -257,20 +324,11 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
     }
 
     override fun onCarouselItemClick(collectionId: Int, collectionTitle: String) {
-        val action = HomeFragmentDirections
-            .actionHomeFragmentToRestaurantByCollectionFragment(
-                collectionId,
-                collectionTitle
-            )
-        findNavController().navigate(action)
+      viewModel.onRestaurantCollectionClick(collectionId, collectionTitle)
     }
 
     override fun onRestaurantItemClick(restaurantX: RestaurantX) {
-        val action =
-            HomeFragmentDirections.actionHomeFragmentToDetailRestaurantFragment(
-                restaurantX
-            )
-        findNavController().navigate(action)
+        viewModel.onRestaurantItemClick(restaurantX)
     }
 
     override fun onResume() {

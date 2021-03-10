@@ -72,8 +72,8 @@ class WelcomeFragment : Fragment(), EasyPermissions.PermissionCallbacks,
         } else {
             observe(viewModel.location) {
                 viewModel.sharedPreferences.edit()
-                    .putString(KEY_LAT, it.latitude.toString())
-                    .putString(KEY_LONG, it.longitude.toString())
+                    .putString(KEY_LAT, it.first)
+                    .putString(KEY_LONG, it.second)
                     .putBoolean(KEY_FIRST_TIME, !isFirstTime)
                     .apply()
                 findNavController().navigate(R.id.action_welcomeFragment_to_homeTestAgainFragment)

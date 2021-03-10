@@ -1,93 +1,128 @@
 package com.dlutrix.foodfinder.ui.home
 
 import android.content.SharedPreferences
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.cachedIn
-import com.dlutrix.foodfinder.data.model.RestaurantCollection
+import com.dlutrix.foodfinder.data.model.RestaurantX
 import com.dlutrix.foodfinder.repository.restaurantAround.RestaurantAroundRepository
 import com.dlutrix.foodfinder.repository.restaurantCollection.RestaurantCollectionRepository
 import com.dlutrix.foodfinder.utils.Constant
 import com.dlutrix.foodfinder.utils.Constant.DEFAULT_LAT
 import com.dlutrix.foodfinder.utils.Constant.DEFAULT_LONG
 import com.dlutrix.foodfinder.utils.LocationHelper
-import com.dlutrix.foodfinder.utils.NetworkHelper
-import com.dlutrix.foodfinder.utils.Resource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 /**
  * w0rm1995 on 22/10/20.
  * risfandi@dlutrix.com
  */
-class HomeViewModel @ViewModelInject constructor(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val restaurantCollectionRepository: RestaurantCollectionRepository,
     private val restaurantAroundRepository: RestaurantAroundRepository,
-    var sharedPreferences: SharedPreferences,
-    networkHelper: NetworkHelper,
-    locationHelper: LocationHelper,
+    private var sharedPreferences: SharedPreferences,
+    private val locationHelper: LocationHelper,
 ) : ViewModel() {
 
     private val lat = sharedPreferences.getString(Constant.KEY_LAT, DEFAULT_LAT) ?: DEFAULT_LAT
     private val long = sharedPreferences.getString(Constant.KEY_LONG, DEFAULT_LONG) ?: DEFAULT_LONG
 
-    val locationLiveData = locationHelper.getLocation()
+    private val _isError = MutableLiveData(true)
+    val isError get() = _isError
+
+    private val homeEventChannel = Channel<HomeEvent>()
+    val homeEvent = homeEventChannel.receiveAsFlow()
 
     private val location = Pair(lat.toDouble(), long.toDouble())
 
-    private val _restaurantCollection: MutableLiveData<Pair<Double, Double>> =
-        MutableLiveData(location)
+    private val _userLocation = MutableLiveData(location)
+
+    val restaurantCollection = _userLocation.switchMap {
+        restaurantCollectionRepository.getRestaurantCollectionFlow(it.first, it.second)
+            .asLiveData(viewModelScope.coroutineContext + Dispatchers.IO)
+    }
 
     private val _restaurantAround: MutableLiveData<Pair<Double, Double>> = MutableLiveData(location)
 
-    private val _locationName: MutableLiveData<Pair<Double, Double>> = MutableLiveData(location)
+    val restaurantAround = _restaurantAround.switchMap {
+        restaurantAroundRepository.getAllRestaurant(it.first, it.second)
+            .asLiveData(viewModelScope.coroutineContext + Dispatchers.IO)
+            .cachedIn(viewModelScope)
+    }
 
-    val restaurantCollection: LiveData<Resource<RestaurantCollection>> =
-        _restaurantCollection.switchMap {
-            liveData(viewModelScope.coroutineContext + Dispatchers.IO) {
-                emit(Resource.loading(null))
-                try {
-                    if (networkHelper.isNetworkConnected()) {
-                        val response = restaurantCollectionRepository
-                            .getRestaurantCollection(it.first, it.second)
-                        if (response.code() == 200) {
-                            emit(Resource.success(response.body()!!))
-                        } else {
-                            emit(
-                                Resource.error(
-                                    data = null,
-                                    "Your location is not available",
-                                    false
-                                )
-                            )
-                        }
-                    } else {
-                        emit(
-                            Resource.error(
-                                data = null,
-                                "Failed to retrieve data from server please check your network and try again",
-                                true
-                            )
-                        )
-                    }
-                } catch (exception: Exception) {
-                    emit(Resource.error(data = null, "Unexpected Error!", true))
-                }
+    val locationName = _userLocation.switchMap {
+        liveData(viewModelScope.coroutineContext + Dispatchers.IO) {
+            emit(locationHelper.getLocationName(it.first, it.second))
+        }
+    }
+
+    private fun getRemoteData(lat: Double, long: Double) {
+        val location = Pair(lat, long)
+        _userLocation.value = location
+        _restaurantAround.value = location
+    }
+
+    fun setIsError(isLoading: Boolean) {
+        _isError.value = isLoading
+    }
+
+    fun refreshLocation() {
+        viewModelScope.launch {
+            locationHelper.getUserLocation().collect {
+                homeEventChannel.send(HomeEvent.RefreshLocation(Pair(it.first, it.second)))
             }
         }
-
-    val restaurantAround = _restaurantAround.switchMap {
-        restaurantAroundRepository.getAllRestaurant(it.first, it.second).cachedIn(viewModelScope)
     }
 
-    val locationName = _locationName.switchMap {
-        locationHelper.getLocationName(it.first, it.second)
+    fun retryObserverIfLocationNotAvailable() {
+        sharedPreferences.edit()
+            .putString(Constant.KEY_LAT, DEFAULT_LAT)
+            .putString(Constant.KEY_LONG, DEFAULT_LONG)
+            .apply()
+
+        getRemoteData(DEFAULT_LAT.toDouble(), DEFAULT_LONG.toDouble())
     }
 
-    fun getRemoteData(lat: Double, long: Double) {
-        val location = Pair(lat, long)
-        _restaurantCollection.value = location
-        _restaurantAround.value = location
-        _locationName.value = location
+    fun retryObserver() {
+        getRemoteData(location.first, location.second)
+    }
+
+    fun retryObserverWhenLocationChanged(lat: Double, long: Double) {
+        sharedPreferences.edit()
+            .putString(Constant.KEY_LAT, lat.toString())
+            .putString(Constant.KEY_LONG, long.toString())
+            .apply()
+
+        getRemoteData(lat, long)
+    }
+
+    fun onRestaurantItemClick(restaurantX: RestaurantX) = viewModelScope.launch {
+        homeEventChannel.send(HomeEvent.NavigateToDetailRestaurant(restaurantX))
+    }
+
+    fun onRestaurantCollectionClick(collectionId: Int, collectionTitle: String) =
+        viewModelScope.launch {
+            homeEventChannel.send(
+                HomeEvent.NavigateToRestaurantCollection(
+                    collectionId,
+                    collectionTitle
+                )
+            )
+        }
+
+    sealed class HomeEvent {
+        data class RefreshLocation(val location: Pair<String, String>) : HomeEvent()
+        data class NavigateToDetailRestaurant(val restaurantX: RestaurantX) : HomeEvent()
+        data class NavigateToRestaurantCollection(
+            val collectionId: Int,
+            val collectionTitle: String
+        ) : HomeEvent()
     }
 }

@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -20,8 +21,9 @@ import com.dlutrix.foodfinder.databinding.ReviewItemBinding
  * w0rm1995 on 17/10/20.
  * risfandi@dlutrix.com
  */
-class ReviewItemAdapter : RecyclerView.Adapter<ReviewItemAdapter.ReviewItemViewHolder>() {
-
+class ReviewItemAdapter : ListAdapter<UserReview, ReviewItemAdapter.ReviewItemViewHolder>(
+    DiffCallback()
+) {
 
     class ReviewItemViewHolder(
         private val binding: ReviewItemBinding
@@ -66,16 +68,13 @@ class ReviewItemAdapter : RecyclerView.Adapter<ReviewItemAdapter.ReviewItemViewH
     }
 
     override fun onBindViewHolder(holder: ReviewItemViewHolder, position: Int) {
-        val item = differ.currentList[position]
+        val item = getItem(position)
 
         holder.bind(item.review)
     }
 
-    override fun getItemCount(): Int {
-        return differ.currentList.size
-    }
 
-    private val differCallback = object : DiffUtil.ItemCallback<UserReview>() {
+    class DiffCallback : DiffUtil.ItemCallback<UserReview>() {
         override fun areItemsTheSame(oldItem: UserReview, newItem: UserReview): Boolean {
             return oldItem.review.id == newItem.review.id
         }
@@ -84,8 +83,4 @@ class ReviewItemAdapter : RecyclerView.Adapter<ReviewItemAdapter.ReviewItemViewH
             return oldItem == newItem
         }
     }
-
-    private val differ = AsyncListDiffer(this, differCallback)
-
-    fun submitList(list: List<UserReview>) = differ.submitList(list)
 }

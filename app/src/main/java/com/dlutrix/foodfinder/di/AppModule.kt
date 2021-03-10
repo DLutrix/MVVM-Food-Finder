@@ -8,14 +8,12 @@ import com.dlutrix.foodfinder.di.qualifier.App
 import com.dlutrix.foodfinder.di.qualifier.Type
 import com.dlutrix.foodfinder.utils.Constant
 import com.dlutrix.foodfinder.utils.Constant.KEY_FIRST_TIME
-import com.dlutrix.foodfinder.utils.Constant.KEY_LAT
-import com.dlutrix.foodfinder.utils.Constant.KEY_LONG
 import com.dlutrix.foodfinder.utils.Constant.SHARED_PREFERENCES_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -28,7 +26,7 @@ import javax.inject.Singleton
  * risfandi@dlutrix.com
  */
 @Module
-@InstallIn(ApplicationComponent::class)
+@InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Provides
