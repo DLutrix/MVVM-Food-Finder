@@ -1,6 +1,7 @@
 package com.dlutrix.foodfinder.data.source.restaurantByCollection
 
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.dlutrix.foodfinder.data.model.Restaurant
 import com.dlutrix.foodfinder.data.source.ZomatoApiService
 import com.dlutrix.foodfinder.utils.Constant.STARTING_PAGE_COUNT
@@ -34,5 +35,9 @@ class RestaurantByCollectionRemotePagingDataSource (
         } catch (e: HttpException) {
             LoadResult.Error(e)
         }
+    }
+
+    override fun getRefreshKey(state: PagingState<Int, Restaurant>): Int? {
+        return state.anchorPosition
     }
 }

@@ -105,7 +105,7 @@ dependencies {
     implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:4.1.2'
 
     // Paging 3
-    implementation "androidx.paging:paging-runtime-ktx:3.0.0-alpha07"
+    implementation "androidx.paging:paging-runtime-ktx:3.0.0-beta01"
 
     // Shimmer
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
