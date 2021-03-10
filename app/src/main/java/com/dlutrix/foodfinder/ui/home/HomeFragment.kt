@@ -248,7 +248,6 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
                         vpShimmer.visible()
                         vpCarousel.gone()
                         dotsIndicator.gone()
-                        errorLayout.gone()
                         isLoading = true
                     }
                 }
@@ -283,7 +282,6 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
                     with(binding) {
                         viewModel.setIsError(false)
                         vpShimmer.gone()
-                        errorLayout.gone()
                         vpCarousel.offscreenPageLimit = 1
                         dotsIndicator.setViewPager2(vpCarousel)
                         vpCarousel.visible()
