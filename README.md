@@ -34,4 +34,8 @@ Food Finder adalah aplikasi sederhana untuk menemukan restoran di sekitar penggu
 <li><a href="https://developers.zomato.com/api">Zomato API</a></li>
 <li>Other...</li>
 
+## MAD Score
+![summary](https://user-images.githubusercontent.com/37602139/121953388-12d70c00-cd90-11eb-80c8-67ed7e2f3ca9.png)
+![kotlin](https://user-images.githubusercontent.com/37602139/121953391-15396600-cd90-11eb-9478-96a9e264de8a.png)
+
 
