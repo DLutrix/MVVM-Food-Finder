@@ -2,14 +2,14 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/welcomeFragment">
+    app:startDestination="@id/permissionFragment">
 
     <fragment
-        android:id="@+id/welcomeFragment"
-        android:name="com.dlutrix.foodfinder.ui.welcome.WelcomeFragment"
+        android:id="@+id/permissionFragment"
+        android:name="com.dlutrix.foodfinder.ui.permission.PermissionFragment"
         android:label="WelcomeFragment">
         <action
-            android:id="@+id/action_welcomeFragment_to_homeTestAgainFragment"
+            android:id="@+id/action_permissionFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:launchSingleTop="true"
             app:popUpTo="@+id/nav_graph"
