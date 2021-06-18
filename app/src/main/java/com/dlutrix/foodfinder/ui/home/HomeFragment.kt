@@ -1,13 +1,19 @@
 package com.dlutrix.foodfinder.ui.home
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -23,12 +29,10 @@ import com.dlutrix.foodfinder.ui.home.adapter.CarouselAdapter
 import com.dlutrix.foodfinder.ui.home.adapter.RestaurantAroundAdapter
 import com.dlutrix.foodfinder.utils.*
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import pub.devrel.easypermissions.AppSettingsDialog
-import pub.devrel.easypermissions.EasyPermissions
-
 
 /**
  * w0rm1995 on 22/10/20.
@@ -37,7 +41,7 @@ import pub.devrel.easypermissions.EasyPermissions
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
-    RestaurantAroundAdapter.OnItemClickListener, EasyPermissions.PermissionCallbacks {
+    RestaurantAroundAdapter.OnItemClickListener {
 
     private val viewModel: HomeViewModel by viewModels()
 
@@ -55,43 +59,12 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
 
     private var shouldMoveForward = true
 
-    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-        viewModel.refreshLocation()
-    }
-
-    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            AppSettingsDialog.Builder(this).build().show()
-        } else {
-            PermissionHelper.requestPermission(
-                this,
-                "You need to accept location permission to use this app",
-                1
-            )
+    private val requestPermissionLauncher =
+        registerForActivityResult(RequestPermission()) { isGranted ->
+            if (isGranted) {
+                viewModel.refreshLocation()
+            }
         }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
-            PermissionHelper.requestPermission(
-                this,
-                "You need to accept location permission to use this app",
-                1
-            )
-        } else {
-            viewModel.refreshLocation()
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -192,14 +165,30 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
     }
 
     private fun changeLocation() {
-        if (PermissionHelper.hasLocationPermission(requireContext())) {
-            viewModel.refreshLocation()
-        } else {
-            PermissionHelper.requestPermission(
-                this,
-                "You need to accept location permission to use this app",
-                1
-            )
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                viewModel.refreshLocation()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                Snackbar.make(
+                    requireView(),
+                    "You need to accept location permission to use this app",
+                    Snackbar.LENGTH_INDEFINITE
+                ).setAction("Settings") {
+                    val intent = Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", requireContext().packageName, null)
+                    )
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                }.show()
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
         }
     }
 
@@ -324,7 +313,7 @@ class HomeFragment : Fragment(), CarouselAdapter.OnItemClickListener,
     }
 
     override fun onCarouselItemClick(collectionId: Int, collectionTitle: String) {
-      viewModel.onRestaurantCollectionClick(collectionId, collectionTitle)
+        viewModel.onRestaurantCollectionClick(collectionId, collectionTitle)
     }
 
     override fun onRestaurantItemClick(restaurantX: RestaurantX) {
