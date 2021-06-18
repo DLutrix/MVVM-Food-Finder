@@ -8,7 +8,7 @@ object Constant {
 
     const val DEBUG = true
 
-    private const val API_KEY = "API_KEY"
+    private const val API_KEY = "API_KEY "
     const val HEADER_1 = "Accept: application/json"
     const val HEADER_2 = "user-key: $API_KEY"
     const val ZOMATO_BASE_URL = "https://developers.zomato.com/api/v2.1/"

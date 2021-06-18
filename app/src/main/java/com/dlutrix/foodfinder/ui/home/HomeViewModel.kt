@@ -1,6 +1,8 @@
 package com.dlutrix.foodfinder.ui.home
 
 import android.content.SharedPreferences
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.*
 import androidx.paging.cachedIn
 import com.dlutrix.foodfinder.data.model.RestaurantX

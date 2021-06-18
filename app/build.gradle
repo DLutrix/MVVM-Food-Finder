@@ -95,9 +95,6 @@ dependencies {
     // Service Location
     implementation "com.google.android.gms:play-services-location:18.0.0"
 
-    // Easy Permission
-    implementation 'pub.devrel:easypermissions:3.0.0'
-
     // View Pager
     implementation "androidx.viewpager2:viewpager2:1.0.0"
 
